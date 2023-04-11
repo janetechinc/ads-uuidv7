@@ -1,31 +1,40 @@
-package uuid7
+package uuidv7
 
 import (
 	"encoding/binary"
 	"math/rand"
 	"sync"
-
-	"github.com/GoWebProd/gip/fasttime"
+	"time"
 )
 
 type Generator struct {
+	ts      int64
 	counter uint32
 	mu      sync.Mutex
 	rnd     rand.Source
 }
 
 func New() *Generator {
+	ts := time.Now().UnixMilli()
 	return &Generator{
-		rnd: rand.NewSource(fasttime.Now()),
+		ts:  ts,
+		rnd: rand.NewSource(ts),
 	}
 }
 
 func (u *Generator) Next() UUID {
-	ts := fasttime.NowNano() / 1_000_000
+	ts := time.Now().UnixMilli()
 
 	u.mu.Lock()
 
-	u.counter += 1
+	// Implementation does not make explicit guarantees about clock drift.
+	// The counter may roll over if there is significantly negative clock corrections
+	if u.ts < ts {
+		u.ts = ts
+		u.counter = 0
+	} else {
+		u.counter += 1
+	}
 
 	cnt := u.counter
 	rnd1 := uint64(u.rnd.Int63())

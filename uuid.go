@@ -1,10 +1,10 @@
-package uuid7
+package uuidv7
 
 import (
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"unsafe"
-
-	"github.com/pkg/errors"
 )
 
 type UUID [16]byte
@@ -52,7 +52,7 @@ func Parse(uuid string) (UUID, error) {
 	u[15] = hexToByte(s[0:2])
 
 	if v := u.version(); v != 7 {
-		return u, errors.Wrapf(ErrBadVersion, "expected version 7, got %d", v)
+		return u, fmt.Errorf("%w: expected version 7, got %d", ErrBadVersion, v)
 	}
 
 	return u, nil

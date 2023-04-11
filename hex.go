@@ -1,4 +1,4 @@
-package uuid7
+package uuidv7
 
 var hexArray = []byte("0123456789abcdef")
 
